@@ -18,6 +18,8 @@ Before running any workflows, ensure the following secrets are configured in you
 
 ### Vercel Deployment
 - `VERCEL_TOKEN` - Vercel authentication token for automated deployments
+- `VERCEL_ORG_ID` - Vercel organization ID (found in project settings)
+- `VERCEL_PROJECT_ID` - Vercel project ID (found in project settings)
 
 ### Rewards System (Test Environment)
 - `REWARDS_PRIVATE_KEY` - Private key for test rewards contract (test wallet only)

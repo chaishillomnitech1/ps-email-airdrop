@@ -17,6 +17,7 @@ on:
         default: 'master'
   schedule:
     # Run weekly on Sundays at 00:00 UTC
+    # Note: Configure source repository in the workflow to enable scheduled syncing
     - cron: '0 0 * * 0'
 
 env:
