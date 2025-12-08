@@ -19,6 +19,8 @@ jobs:
   pilot-rewards:
     runs-on: ubuntu-latest
     environment: test
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
