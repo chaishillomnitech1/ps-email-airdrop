@@ -1,6 +1,9 @@
 # Apillon pre-built solution for NFT Email Airdrop
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/Apillon?style=social)](https://twitter.com/intent/follow?screen_name=Apillon)
+[![Backend CI](https://github.com/chaishillomnitech1/ps-email-airdrop/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/chaishillomnitech1/ps-email-airdrop/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/chaishillomnitech1/ps-email-airdrop/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/chaishillomnitech1/ps-email-airdrop/actions/workflows/frontend-ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Simplify your NFT distribution process by easily distributing digital collectibles (NFTs) to users using only their email addresses with our solution.
 
@@ -42,6 +45,32 @@ Once downloaded, the zip file includes all files you need to run the application
 | [Backend](backend/README.md)   | Docs for node.js backend |
 | [Frontend](frontend/README.md) | Docs from Vue 3 frontend |
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+
+## Security
+
+For security concerns, please review our [Security Policy](SECURITY.md).
+
+## Community and Support
+
+- **Issues:** [GitHub Issues](https://github.com/chaishillomnitech1/ps-email-airdrop/issues)
+- **Pull Requests:** [GitHub Pull Requests](https://github.com/chaishillomnitech1/ps-email-airdrop/pulls)
+- **Discussions:** For questions and community discussion
+
+## Code of Conduct
+
+This project follows a code of conduct to ensure a welcoming environment for all contributors. We expect all participants to:
+
+- Be respectful and inclusive
+- Welcome newcomers and help them get started
+- Focus on constructive feedback
+- Prioritize the community's well-being
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
+
+---
+ALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN! 🕋♾️✨
