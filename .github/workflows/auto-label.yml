@@ -1,0 +1,138 @@
+name: Auto Label
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  label-pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Label based on files changed
+      uses: actions/labeler@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        configuration-path: .github/labeler.yml
+    
+    - name: Add area labels
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: files } = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+          
+          const labels = new Set();
+          
+          for (const file of files) {
+            // Backend
+            if (file.filename.startsWith('backend/')) {
+              labels.add('backend');
+            }
+            // Frontend
+            if (file.filename.startsWith('frontend/')) {
+              labels.add('frontend');
+            }
+            // Documentation
+            if (file.filename.endsWith('.md')) {
+              labels.add('documentation');
+            }
+            // GitHub config
+            if (file.filename.startsWith('.github/')) {
+              labels.add('github');
+            }
+            // Tests
+            if (file.filename.includes('test') || file.filename.includes('spec')) {
+              labels.add('tests');
+            }
+            // Dependencies
+            if (file.filename.includes('package.json') || file.filename.includes('package-lock.json')) {
+              labels.add('dependencies');
+            }
+            // CI/CD
+            if (file.filename.includes('workflow') || file.filename.includes('.yml')) {
+              labels.add('ci-cd');
+            }
+          }
+          
+          if (labels.size > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: Array.from(labels)
+            });
+          }
+  
+  label-issue:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    
+    steps:
+    - name: Auto-label based on issue content
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue = context.payload.issue;
+          const body = issue.body || '';
+          const title = issue.title || '';
+          const content = (title + ' ' + body).toLowerCase();
+          
+          const labels = [];
+          
+          // Type detection
+          if (content.includes('bug') || content.includes('error') || content.includes('broken')) {
+            labels.push('bug');
+          }
+          if (content.includes('feature') || content.includes('enhancement')) {
+            labels.push('enhancement');
+          }
+          if (content.includes('documentation') || content.includes('docs')) {
+            labels.push('documentation');
+          }
+          if (content.includes('question') || content.includes('help')) {
+            labels.push('question');
+          }
+          if (content.includes('security') || content.includes('vulnerability')) {
+            labels.push('security');
+          }
+          
+          // Area detection
+          if (content.includes('backend') || content.includes('api')) {
+            labels.push('backend');
+          }
+          if (content.includes('frontend') || content.includes('ui') || content.includes('vue')) {
+            labels.push('frontend');
+          }
+          if (content.includes('database') || content.includes('mysql')) {
+            labels.push('database');
+          }
+          if (content.includes('email') || content.includes('nodemailer')) {
+            labels.push('email');
+          }
+          if (content.includes('nft') || content.includes('apillon')) {
+            labels.push('nft');
+          }
+          
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: labels
+            });
+          }
