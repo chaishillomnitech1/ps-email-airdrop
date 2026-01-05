@@ -1,0 +1,74 @@
+# Labeler configuration for automatic PR labeling
+# https://github.com/actions/labeler
+
+# Backend changes
+backend:
+  - changed-files:
+    - any-glob-to-any-file: 'backend/**/*'
+
+# Frontend changes  
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**/*'
+
+# Documentation changes
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - '**/*.md'
+      - 'docs/**/*'
+
+# GitHub configuration
+github:
+  - changed-files:
+    - any-glob-to-any-file: '.github/**/*'
+
+# CI/CD changes
+ci-cd:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - '.github/workflows/**/*'
+      - '**/*.yml'
+      - '**/*.yaml'
+
+# Tests
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.*'
+      - '**/*.spec.*'
+      - '**/tests/**/*'
+      - '**/test/**/*'
+
+# Dependencies
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - '.github/dependabot.yml'
+
+# Configuration files
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.config.*'
+      - '**/.env.example'
+      - '**/tsconfig.json'
+      - '**/.prettierrc'
+      - '**/.eslintrc*'
+
+# Database
+database:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/migrations/**/*'
+      - '**/db/**/*'
+      - 'backend/src/lib/migrations/**/*'
+
+# Security
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'SECURITY.md'
+      - '.github/workflows/security.yml'

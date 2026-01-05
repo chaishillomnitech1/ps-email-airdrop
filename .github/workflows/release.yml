@@ -1,0 +1,147 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+    
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Update version in package.json files
+      run: |
+        # Update backend version
+        cd backend
+        npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        cd ..
+        
+        # Update frontend version
+        cd frontend
+        npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        cd ..
+    
+    - name: Update CHANGELOG
+      run: |
+        # Get current date
+        DATE=$(date +%Y-%m-%d)
+        
+        # Replace [Unreleased] with version and date
+        sed -i "s/## \[Unreleased\]/## [Unreleased]\n\n## [${{ github.event.inputs.version }}] - ${DATE}/" CHANGELOG.md
+    
+    - name: Commit version changes
+      run: |
+        git add backend/package.json backend/package-lock.json
+        git add frontend/package.json frontend/package-lock.json
+        git add CHANGELOG.md
+        git commit -m "chore: release v${{ github.event.inputs.version }}"
+        git push
+    
+    - name: Create Git tag
+      run: |
+        git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
+        git push origin "v${{ github.event.inputs.version }}"
+    
+    - name: Generate release notes
+      id: release_notes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+          
+          // Extract the latest version section
+          const versionRegex = new RegExp(`## \\[${{ github.event.inputs.version }}\\].*?(?=## \\[|$)`, 's');
+          const match = changelog.match(versionRegex);
+          
+          let releaseNotes = match ? match[0] : '';
+          
+          // Add footer
+          releaseNotes += '\n\n---\n\nALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN! 🕋♾️✨';
+          
+          return releaseNotes;
+    
+    - name: Build artifacts
+      run: |
+        # Build backend
+        cd backend
+        npm ci
+        npm run build
+        cd ..
+        
+        # Build frontend
+        cd frontend
+        npm ci
+        npm run generate
+        cd ..
+    
+    - name: Create release archives
+      run: |
+        # Create backend archive
+        tar -czf backend-${{ github.event.inputs.version }}.tar.gz -C backend/build .
+        
+        # Create frontend archive
+        tar -czf frontend-${{ github.event.inputs.version }}.tar.gz -C frontend/.output/public .
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.event.inputs.version }}
+        name: Release v${{ github.event.inputs.version }}
+        body: ${{ steps.release_notes.outputs.result }}
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease }}
+        files: |
+          backend-${{ github.event.inputs.version }}.tar.gz
+          frontend-${{ github.event.inputs.version }}.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Create release PR for documentation
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.pulls.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `docs: Update documentation for v${{ github.event.inputs.version }}`,
+            head: context.ref.replace('refs/heads/', ''),
+            base: 'main',
+            body: `Updates documentation and changelog for release v${{ github.event.inputs.version }}\n\n- Version bumped to ${{ github.event.inputs.version }}\n- CHANGELOG updated\n- Release artifacts created\n\nALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN! 🕋♾️✨`
+          });

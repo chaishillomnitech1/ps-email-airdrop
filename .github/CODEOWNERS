@@ -1,0 +1,27 @@
+# CODEOWNERS file for ps-email-airdrop
+# This file defines code ownership and review requirements
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global ownership - chaishillomnitech1 is the primary owner
+* @chaishillomnitech1
+
+# Backend ownership
+/backend/ @chaishillomnitech1
+
+# Frontend ownership
+/frontend/ @chaishillomnitech1
+
+# Documentation ownership
+*.md @chaishillomnitech1
+/docs/ @chaishillomnitech1
+
+# Configuration files
+/.github/ @chaishillomnitech1
+*.json @chaishillomnitech1
+*.yml @chaishillomnitech1
+*.yaml @chaishillomnitech1
+
+# Security and governance
+/SECURITY.md @chaishillomnitech1
+/CONTRIBUTING.md @chaishillomnitech1
+/LICENSE @chaishillomnitech1

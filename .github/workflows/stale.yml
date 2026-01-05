@@ -1,0 +1,83 @@
+name: Mark Stale Issues and PRs
+
+on:
+  schedule:
+    # Run daily at 1:00 AM UTC
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Mark stale issues and PRs
+      uses: actions/stale@v9
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        
+        # Issues configuration
+        stale-issue-message: |
+          This issue has been automatically marked as stale because it has not had recent activity. 
+          It will be closed in 7 days if no further activity occurs. 
+          
+          If this issue is still relevant, please:
+          - Add a comment to keep it open
+          - Provide additional context or updates
+          - Remove the 'stale' label
+          
+          Thank you for your contributions! 🙏
+        
+        close-issue-message: |
+          This issue has been automatically closed due to inactivity.
+          
+          If you believe this issue is still relevant, please:
+          - Reopen the issue
+          - Provide updated information
+          - Reference any related work
+          
+          Thank you for your understanding! 🙏
+        
+        stale-issue-label: 'stale'
+        exempt-issue-labels: 'pinned,security,bug,critical,in-progress'
+        days-before-issue-stale: 60
+        days-before-issue-close: 7
+        
+        # Pull requests configuration
+        stale-pr-message: |
+          This pull request has been automatically marked as stale because it has not had recent activity.
+          It will be closed in 14 days if no further activity occurs.
+          
+          If this PR is still being worked on, please:
+          - Add a comment with status update
+          - Push new commits
+          - Request a review
+          - Remove the 'stale' label
+          
+          Thank you for your contributions! 🙏
+        
+        close-pr-message: |
+          This pull request has been automatically closed due to inactivity.
+          
+          If you'd like to continue this work:
+          - Reopen this PR with updates
+          - Create a new PR with fresh changes
+          - Contact maintainers for guidance
+          
+          Thank you for your understanding! 🙏
+        
+        stale-pr-label: 'stale'
+        exempt-pr-labels: 'pinned,security,critical,in-progress,awaiting-review'
+        days-before-pr-stale: 45
+        days-before-pr-close: 14
+        
+        # General configuration
+        ascending: true
+        remove-stale-when-updated: true
+        operations-per-run: 50
+        exempt-milestones: true
+        exempt-all-milestones: true

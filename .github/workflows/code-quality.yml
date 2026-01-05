@@ -1,0 +1,143 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-quality:
+    name: Backend Code Quality
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check code formatting
+      run: npx prettier --check "**/*.{ts,tsx,md}"
+    
+    - name: Run type check
+      run: npm run tsc -- --noEmit
+  
+  frontend-quality:
+    name: Frontend Code Quality
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run ESLint
+      run: npx eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore || true
+    
+    - name: Check code formatting
+      run: npx prettier --check "**/*.{vue,js,ts,json,md}"
+  
+  pr-size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check PR size
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: files } = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+          
+          const additions = files.reduce((acc, file) => acc + file.additions, 0);
+          const deletions = files.reduce((acc, file) => acc + file.deletions, 0);
+          const totalChanges = additions + deletions;
+          
+          let label = '';
+          let message = '';
+          
+          if (totalChanges < 50) {
+            label = 'size/XS';
+            message = '✅ Extra Small PR - Quick to review!';
+          } else if (totalChanges < 200) {
+            label = 'size/S';
+            message = '✅ Small PR - Easy to review';
+          } else if (totalChanges < 500) {
+            label = 'size/M';
+            message = '⚠️ Medium PR - Consider splitting if possible';
+          } else if (totalChanges < 1000) {
+            label = 'size/L';
+            message = '⚠️ Large PR - Please consider splitting';
+          } else {
+            label = 'size/XL';
+            message = '❌ Extra Large PR - Strongly recommend splitting this PR';
+          }
+          
+          // Add label
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: [label]
+          });
+          
+          // Add comment
+          const comments = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.data.find(comment => 
+            comment.user.type === 'Bot' && comment.body.includes('PR Size:')
+          );
+          
+          const body = `## PR Size: ${label}\n\n${message}\n\n**Changes:** +${additions} -${deletions} (${totalChanges} total)`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+          }

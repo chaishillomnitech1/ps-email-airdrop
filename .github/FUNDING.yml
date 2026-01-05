@@ -1,0 +1,15 @@
+# GitHub Sponsors configuration
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# Specify GitHub users that can receive sponsorship
+github: [chaishillomnitech1]
+
+# Specify other funding platforms
+# patreon: your-username
+# open_collective: your-username
+# ko_fi: your-username
+# tidelift: npm/package-name
+# community_bridge: project-name
+# liberapay: your-username
+# issuehunt: your-username
+# custom: ['https://your-link.com', 'https://another-link.com']
